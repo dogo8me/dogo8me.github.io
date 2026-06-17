@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Farm Work Tracker</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <h1>Farm Work Tracker</h1>
+        <p class="subtitle">Track time, notes, totals, and export your work log.</p>
+      </header>
+
+      <section class="panel">
+        <h2>Active Session</h2>
+        <p class="timer" id="activeTimer">00:00:00</p>
+        <label for="activeNote">What are you working on?</label>
+        <textarea id="activeNote" rows="2" placeholder="Feeding animals, fixing fences..."></textarea>
+        <div class="row">
+          <button id="startBtn" class="primary">Start Work</button>
+          <button id="stopBtn" class="danger" disabled>Stop Work</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Add Historical Time</h2>
+        <div class="grid-2">
+          <div>
+            <label for="historyStart">Start</label>
+            <input id="historyStart" type="datetime-local" />
+          </div>
+          <div>
+            <label for="historyEnd">End</label>
+            <input id="historyEnd" type="datetime-local" />
+          </div>
+        </div>
+        <label for="historyNote">Note</label>
+        <textarea id="historyNote" rows="2" placeholder="What you did"></textarea>
+        <button id="addHistoryBtn">Add Historical Entry</button>
+      </section>
+
+      <section class="panel">
+        <h2>Summary</h2>
+        <div class="summary-grid">
+          <article>
+            <h3>Total Hours</h3>
+            <p id="totalHours">0.00</p>
+          </article>
+          <article>
+            <h3>Money Earned</h3>
+            <p id="totalMoney">$0.00</p>
+          </article>
+          <article>
+            <h3>Avg Hours / Day</h3>
+            <p id="avgHours">0.00</p>
+          </article>
+          <article>
+            <h3>Total Sessions</h3>
+            <p id="sessionCount">0</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="row row-wrap">
+          <h2>Work Log</h2>
+          <div class="row">
+            <button id="exportCsvBtn">Export CSV</button>
+            <button id="printBtn">Print Report</button>
+            <button id="clearBtn" class="danger">Clear All</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Hours</th>
+                <th>Note</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="entriesBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <p id="status" role="status" aria-live="polite"></p>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
