@@ -165,6 +165,7 @@
       const actionCell = document.createElement("td");
       const deleteButton = document.createElement("button");
       deleteButton.dataset.deleteId = String(entry.id);
+      deleteButton.setAttribute("aria-label", `Delete entry from ${start.toLocaleDateString()}`);
       deleteButton.textContent = "Delete";
       actionCell.append(deleteButton);
 
@@ -242,7 +243,10 @@
     const a = document.createElement("a");
     a.href = url;
     a.download = "farm-work-log.csv";
+    a.style.display = "none";
+    document.body.append(a);
     a.click();
+    a.remove();
     URL.revokeObjectURL(url);
     setStatus("CSV exported.");
   }
