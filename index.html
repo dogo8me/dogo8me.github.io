@@ -13,14 +13,14 @@
         <p class="subtitle">Track time, notes, totals, and export your work log.</p>
       </header>
 
-      <section class="panel">
+      <section class="panel panel-active">
         <h2>Active Session</h2>
         <p class="timer" id="activeTimer">00:00:00</p>
         <label for="activeNote">What are you working on?</label>
         <textarea id="activeNote" rows="2" placeholder="Feeding animals, fixing fences..."></textarea>
         <div class="row">
-          <button id="startBtn" class="primary">Start Work</button>
-          <button id="stopBtn" class="danger" disabled>Stop Work</button>
+          <button id="startBtn" class="primary">🌱 Start Session</button>
+          <button id="stopBtn" class="danger" disabled>🛑 End Session</button>
         </div>
       </section>
 
@@ -38,26 +38,26 @@
         </div>
         <label for="historyNote">Note</label>
         <textarea id="historyNote" rows="2" placeholder="What you did"></textarea>
-        <button id="addHistoryBtn">Add Historical Entry</button>
+        <button id="addHistoryBtn" class="secondary">➕ Add Historical Entry</button>
       </section>
 
       <section class="panel">
         <h2>Summary</h2>
         <div class="summary-grid">
           <article>
-            <h3>Total Hours</h3>
+            <h3>⏱️ Total Hours</h3>
             <p id="totalHours">0.00</p>
           </article>
           <article>
-            <h3>Money Earned</h3>
+            <h3>💵 Money Earned</h3>
             <p id="totalMoney">$0.00</p>
           </article>
           <article>
-            <h3>Avg Hours / Day</h3>
+            <h3>📊 Avg Hours / Day</h3>
             <p id="avgHours">0.00</p>
           </article>
           <article>
-            <h3>Total Sessions</h3>
+            <h3>🧾 Total Sessions</h3>
             <p id="sessionCount">0</p>
           </article>
         </div>
@@ -67,9 +67,9 @@
         <div class="row row-wrap">
           <h2>Work Log</h2>
           <div class="row">
-            <button id="exportCsvBtn">Export CSV</button>
-            <button id="printBtn">Print Report</button>
-            <button id="clearBtn" class="danger">Clear All</button>
+            <button id="exportCsvBtn" class="secondary">📤 Export CSV</button>
+            <button id="printBtn" class="secondary">🖨️ Print Report</button>
+            <button id="clearBtn" class="danger">🗑️ Clear All</button>
           </div>
         </div>
         <div class="table-wrap">
