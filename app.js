@@ -41,7 +41,7 @@
         els.activeNote.value = data.activeNote;
       }
     } catch {
-      setStatus("Couldn't load saved data.");
+      setStatus("Couldn't load saved data.", "error");
     }
   }
 
@@ -89,8 +89,9 @@
     return new Date(entry.end).getTime() - new Date(entry.start).getTime();
   }
 
-  function setStatus(message) {
+  function setStatus(message, tone = "info") {
     els.status.textContent = message;
+    els.status.dataset.tone = tone;
   }
 
   function updateTimer() {
@@ -166,7 +167,8 @@
       const deleteButton = document.createElement("button");
       deleteButton.dataset.deleteId = String(entry.id);
       deleteButton.setAttribute("aria-label", `Delete entry from ${start.toLocaleDateString()}`);
-      deleteButton.textContent = "Delete";
+      deleteButton.className = "danger";
+      deleteButton.textContent = "🗑️ Delete";
       actionCell.append(deleteButton);
 
       row.append(dateCell, startCell, endCell, hoursCell, noteCell, actionCell);
@@ -189,11 +191,11 @@
       note: (note || "").trim(),
     };
     if (!isValidEntry(entry)) {
-      setStatus("Entry must have a valid start and end time.");
+      setStatus("Entry must have a valid start and end time.", "error");
       return false;
     }
     state.entries.push(entry);
-    setStatus("Entry saved.");
+    setStatus("Entry saved.", "success");
     renderAll();
     return true;
   }
@@ -209,7 +211,7 @@
 
   function exportCsv() {
     if (!state.entries.length) {
-      setStatus("Nothing to export yet.");
+      setStatus("Nothing to export yet.", "error");
       return;
     }
 
@@ -248,7 +250,7 @@
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    setStatus("CSV exported.");
+    setStatus("CSV exported.", "success");
   }
 
   function printReport() {
@@ -281,7 +283,7 @@
     const printWindow = window.open(htmlUrl, "_blank", "noopener,noreferrer");
     if (!printWindow) {
       URL.revokeObjectURL(htmlUrl);
-      setStatus("Popup blocked. Please allow popups to print.");
+      setStatus("Popup blocked. Please allow popups to print.", "error");
       return;
     }
 
@@ -294,13 +296,13 @@
       { once: true },
     );
 
-    setStatus("Print dialog opened.");
+    setStatus("Print dialog opened.", "success");
   }
 
   els.startBtn.addEventListener("click", () => {
     if (state.activeStart) return;
     state.activeStart = new Date().toISOString();
-    setStatus("Work session started.");
+    setStatus("Work session started.", "success");
     renderAll();
   });
 
@@ -320,7 +322,7 @@
     const start = parseLocalDateTime(els.historyStart.value);
     const end = parseLocalDateTime(els.historyEnd.value);
     if (!start || !end) {
-      setStatus("Please enter valid start and end values.");
+      setStatus("Please enter valid start and end values.", "error");
       return;
     }
     const note = els.historyNote.value;
@@ -336,7 +338,7 @@
     if (!button) return;
     const id = button.dataset.deleteId;
     state.entries = state.entries.filter((entry) => String(entry.id) !== id);
-    setStatus("Entry deleted.");
+    setStatus("Entry deleted.", "success");
     renderAll();
   });
 
@@ -348,7 +350,7 @@
     state.entries = [];
     state.activeStart = null;
     els.activeNote.value = "";
-    setStatus("All entries cleared.");
+    setStatus("All entries cleared.", "success");
     renderAll();
   });
 
