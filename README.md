@@ -18,4 +18,6 @@ A mobile-friendly dark mode web app for tracking farm work hours and notes.
 
 ## Run
 
-Open `/home/runner/work/work_tracker/work_tracker/index.html` in your browser.
+Open `index.html` in your browser.
+
+> Pay rate is currently set to **$10/hour** in `app.js` (`PAY_PER_HOUR`).

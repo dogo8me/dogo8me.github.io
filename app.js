@@ -133,27 +133,43 @@
   }
 
   function renderEntries() {
+    els.entriesBody.textContent = "";
+
     if (!state.entries.length) {
-      els.entriesBody.innerHTML = `<tr><td colspan="6">No entries yet.</td></tr>`;
+      const row = document.createElement("tr");
+      const cell = document.createElement("td");
+      cell.colSpan = 6;
+      cell.textContent = "No entries yet.";
+      row.append(cell);
+      els.entriesBody.append(row);
       return;
     }
 
     const sorted = [...state.entries].sort((a, b) => new Date(b.start) - new Date(a.start));
-    els.entriesBody.innerHTML = sorted
-      .map((entry) => {
-        const start = new Date(entry.start);
-        const end = new Date(entry.end);
-        const id = String(entry.id);
-        return `<tr>
-          <td>${start.toLocaleDateString()}</td>
-          <td>${start.toLocaleTimeString()}</td>
-          <td>${end.toLocaleTimeString()}</td>
-          <td>${formatHours(entryDurationMs(entry))}</td>
-          <td>${escapeHtml(entry.note || "")}</td>
-          <td><button data-delete-id="${id}">Delete</button></td>
-        </tr>`;
-      })
-      .join("");
+    for (const entry of sorted) {
+      const start = new Date(entry.start);
+      const end = new Date(entry.end);
+
+      const row = document.createElement("tr");
+      const dateCell = document.createElement("td");
+      dateCell.textContent = start.toLocaleDateString();
+      const startCell = document.createElement("td");
+      startCell.textContent = start.toLocaleTimeString();
+      const endCell = document.createElement("td");
+      endCell.textContent = end.toLocaleTimeString();
+      const hoursCell = document.createElement("td");
+      hoursCell.textContent = formatHours(entryDurationMs(entry));
+      const noteCell = document.createElement("td");
+      noteCell.textContent = entry.note || "";
+      const actionCell = document.createElement("td");
+      const deleteButton = document.createElement("button");
+      deleteButton.dataset.deleteId = String(entry.id);
+      deleteButton.textContent = "Delete";
+      actionCell.append(deleteButton);
+
+      row.append(dateCell, startCell, endCell, hoursCell, noteCell, actionCell);
+      els.entriesBody.append(row);
+    }
   }
 
   function renderAll() {
