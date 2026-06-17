@@ -1,4 +1,5 @@
 (() => {
+  // Change this value if your hourly pay rate changes.
   const PAY_PER_HOUR = 10;
   const STORAGE_KEY = "farm-work-tracker-data-v1";
 
@@ -271,16 +272,24 @@
       </tbody></table>
       </body></html>`;
 
-    const w = window.open("", "_blank", "noopener,noreferrer");
-    if (!w) {
+    const htmlBlob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const htmlUrl = URL.createObjectURL(htmlBlob);
+    const printWindow = window.open(htmlUrl, "_blank", "noopener,noreferrer");
+    if (!printWindow) {
+      URL.revokeObjectURL(htmlUrl);
       setStatus("Popup blocked. Please allow popups to print.");
       return;
     }
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
-    w.focus();
-    w.print();
+
+    printWindow.addEventListener(
+      "load",
+      () => {
+        printWindow.print();
+        URL.revokeObjectURL(htmlUrl);
+      },
+      { once: true },
+    );
+
     setStatus("Print dialog opened.");
   }
 
