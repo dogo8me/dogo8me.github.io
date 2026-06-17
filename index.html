@@ -9,70 +9,76 @@
   <body>
     <main class="app">
       <header>
-        <h1>Farm Work Tracker</h1>
-        <p class="subtitle">Track time, notes, totals, and export your work log.</p>
+        <h1>FARM WORK TRACKER</h1>
+        <p class="tagline">Track time. Log work. Get paid.</p>
       </header>
 
-      <section class="panel panel-active">
+      <section class="panel active-session">
         <h2>Active Session</h2>
-        <p class="timer" id="activeTimer">00:00:00</p>
-        <label for="activeNote">What are you working on?</label>
-        <textarea id="activeNote" rows="2" placeholder="Feeding animals, fixing fences..."></textarea>
-        <div class="row">
-          <button id="startBtn" class="primary">🌱 Start Session</button>
-          <button id="stopBtn" class="danger" disabled>🛑 End Session</button>
+        <div class="timer-display">
+          <p class="timer" id="activeTimer">00:00:00</p>
+        </div>
+        <div class="form-group">
+          <label for="activeNote">What are you working on?</label>
+          <textarea id="activeNote" rows="3" placeholder="Feeding animals, fixing fences..."></textarea>
+        </div>
+        <div class="button-group">
+          <button id="startBtn" class="btn btn-primary">START SESSION</button>
+          <button id="stopBtn" class="btn btn-danger" disabled>END SESSION</button>
         </div>
       </section>
 
       <section class="panel">
-        <h2>Add Historical Time</h2>
-        <div class="grid-2">
-          <div>
-            <label for="historyStart">Start</label>
+        <h2>Add Historical Entry</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="historyStart">Start Date / Time</label>
             <input id="historyStart" type="datetime-local" />
           </div>
-          <div>
-            <label for="historyEnd">End</label>
+          <div class="form-group">
+            <label for="historyEnd">End Date / Time</label>
             <input id="historyEnd" type="datetime-local" />
           </div>
         </div>
-        <label for="historyNote">Note</label>
-        <textarea id="historyNote" rows="2" placeholder="What you did"></textarea>
-        <button id="addHistoryBtn" class="secondary">➕ Add Historical Entry</button>
+        <div class="form-group">
+          <label for="historyNote">Notes</label>
+          <textarea id="historyNote" rows="2" placeholder="What you did"></textarea>
+        </div>
+        <button id="addHistoryBtn" class="btn btn-secondary">ADD ENTRY</button>
       </section>
 
       <section class="panel">
         <h2>Summary</h2>
-        <div class="summary-grid">
-          <article>
-            <h3>⏱️ Total Hours</h3>
-            <p id="totalHours">0.00</p>
+        <div class="summary-cards">
+          <article class="summary-card">
+            <p class="summary-label">Total Hours</p>
+            <p class="summary-value" id="totalHours">0.00</p>
           </article>
-          <article>
-            <h3>💵 Money Earned</h3>
-            <p id="totalMoney">$0.00</p>
+          <article class="summary-card">
+            <p class="summary-label">Money Earned</p>
+            <p class="summary-value" id="totalMoney">$0.00</p>
           </article>
-          <article>
-            <h3>📊 Avg Hours / Day</h3>
-            <p id="avgHours">0.00</p>
+          <article class="summary-card">
+            <p class="summary-label">Avg Hours / Day</p>
+            <p class="summary-value" id="avgHours">0.00</p>
           </article>
-          <article>
-            <h3>🧾 Total Sessions</h3>
-            <p id="sessionCount">0</p>
+          <article class="summary-card">
+            <p class="summary-label">Total Sessions</p>
+            <p class="summary-value" id="sessionCount">0</p>
           </article>
         </div>
       </section>
 
       <section class="panel">
-        <div class="row row-wrap">
+        <div class="panel-header">
           <h2>Work Log</h2>
-          <div class="row">
-            <button id="exportCsvBtn" class="secondary">📤 Export CSV</button>
-            <button id="printBtn" class="secondary">🖨️ Print Report</button>
-            <button id="clearBtn" class="danger">🗑️ Clear All</button>
+          <div class="button-group-horizontal">
+            <button id="exportCsvBtn" class="btn btn-secondary btn-small">EXPORT CSV</button>
+            <button id="printBtn" class="btn btn-secondary btn-small">PRINT</button>
+            <button id="clearBtn" class="btn btn-danger btn-small">CLEAR</button>
           </div>
         </div>
-        <div class="table-wrap">
+        <div class="table-container">
           <table>
             <thead>
               <tr>
@@ -80,8 +86,8 @@
                 <th>Start</th>
                 <th>End</th>
                 <th>Hours</th>
-                <th>Note</th>
-                <th></th>
+                <th>Notes</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody id="entriesBody"></tbody>
@@ -89,7 +95,7 @@
         </div>
       </section>
 
-      <p id="status" role="status" aria-live="polite"></p>
+      <div id="status" role="status" aria-live="polite" class="status-message"></div>
     </main>
 
     <script src="app.js"></script>
