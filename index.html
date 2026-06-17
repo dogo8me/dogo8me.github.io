@@ -1,103 +1,670 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Farm Work Tracker</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <main class="app">
-      <header>
-        <h1>FARM WORK TRACKER</h1>
-        <p class="tagline">Track time. Log work. Get paid.</p>
-      </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farm Work Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
-      <section class="panel active-session">
-        <h2>Active Session</h2>
-        <div class="timer-display">
-          <p class="timer" id="activeTimer">00:00:00</p>
-        </div>
-        <div class="form-group">
-          <label for="activeNote">What are you working on?</label>
-          <textarea id="activeNote" rows="3" placeholder="Feeding animals, fixing fences..."></textarea>
-        </div>
-        <div class="button-group">
-          <button id="startBtn" class="btn btn-primary">START SESSION</button>
-          <button id="stopBtn" class="btn btn-danger" disabled>END SESSION</button>
-        </div>
-      </section>
+<!-- Field strip — ambient pulse when session is active -->
+<div class="field-strip" id="fieldStrip"></div>
 
-      <section class="panel">
-        <h2>Add Historical Entry</h2>
-        <div class="form-grid">
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">⛰</span>
+      <div>
+        <p class="brand-name">Field Tracker</p>
+        <p class="brand-sub">Work · Log · Pay</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="tracker" onclick="switchView('tracker')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Timer
+      </button>
+      <button class="nav-item" data-view="log" onclick="switchView('log')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        Work Log
+      </button>
+      <button class="nav-item" data-view="summary" onclick="switchView('summary')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Summary
+      </button>
+      <button class="nav-item" data-view="settings" onclick="switchView('settings')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        Settings
+      </button>
+    </nav>
+
+    <div class="sidebar-stats">
+      <p class="sidebar-stats-label">Today</p>
+      <p class="sidebar-stats-value" id="todayHours">0.0 hrs</p>
+      <div class="day-goal-bar">
+        <div class="day-goal-fill" id="dayGoalFill" style="width:0%"></div>
+      </div>
+      <p class="sidebar-stats-sub" id="goalLabel">0% of daily goal</p>
+    </div>
+
+    <div class="streak-badge" id="streakBadge">
+      <span class="streak-fire">🌾</span>
+      <div>
+        <p class="streak-num" id="streakNum">0</p>
+        <p class="streak-label">day streak</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- ===== TRACKER VIEW ===== -->
+    <section class="view active" id="view-tracker">
+
+      <div class="timer-hero">
+        <div class="timer-date" id="timerDate"></div>
+        <div class="timer-display" id="timerDisplay">00:00:00</div>
+        <div class="timer-status" id="timerStatus">Ready to start</div>
+      </div>
+
+      <div class="session-card">
+        <div class="tag-row">
+          <p class="field-label">Work type</p>
+          <div class="tag-grid" id="tagGrid">
+            <button class="tag-btn active" data-tag="General">General</button>
+            <button class="tag-btn" data-tag="Feeding">🐄 Feeding</button>
+            <button class="tag-btn" data-tag="Fencing">🔧 Fencing</button>
+            <button class="tag-btn" data-tag="Planting">🌱 Planting</button>
+            <button class="tag-btn" data-tag="Harvest">🌾 Harvest</button>
+            <button class="tag-btn" data-tag="Equipment">🚜 Equipment</button>
+            <button class="tag-btn" data-tag="Other">Other</button>
+          </div>
+        </div>
+
+        <div class="note-row">
+          <label class="field-label" for="activeNote">Session notes</label>
+          <textarea id="activeNote" rows="2" placeholder="What are you working on today?"></textarea>
+        </div>
+
+        <div class="session-actions">
+          <button class="btn-start" id="startBtn" onclick="startSession()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+            Start Session
+          </button>
+          <button class="btn-stop" id="stopBtn" onclick="stopSession()" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16"/></svg>
+            End Session
+          </button>
+        </div>
+
+        <div class="session-meta" id="sessionMeta" style="display:none">
+          <span id="sessionStart"></span>
+          <span class="dot-sep">·</span>
+          <span id="sessionEarning" class="earning-live">$0.00 earned</span>
+        </div>
+      </div>
+
+      <!-- Quick Add Historical -->
+      <div class="section-head">
+        <h2>Add past entry</h2>
+      </div>
+      <div class="history-card">
+        <div class="form-row">
           <div class="form-group">
-            <label for="historyStart">Start Date / Time</label>
-            <input id="historyStart" type="datetime-local" />
+            <label class="field-label" for="historyStart">Start</label>
+            <input type="datetime-local" id="historyStart" />
           </div>
           <div class="form-group">
-            <label for="historyEnd">End Date / Time</label>
-            <input id="historyEnd" type="datetime-local" />
+            <label class="field-label" for="historyEnd">End</label>
+            <input type="datetime-local" id="historyEnd" />
           </div>
         </div>
         <div class="form-group">
-          <label for="historyNote">Notes</label>
-          <textarea id="historyNote" rows="2" placeholder="What you did"></textarea>
+          <label class="field-label" for="historyTag">Work type</label>
+          <select id="historyTag">
+            <option value="General">General</option>
+            <option value="Feeding">🐄 Feeding</option>
+            <option value="Fencing">🔧 Fencing</option>
+            <option value="Planting">🌱 Planting</option>
+            <option value="Harvest">🌾 Harvest</option>
+            <option value="Equipment">🚜 Equipment</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
-        <button id="addHistoryBtn" class="btn btn-secondary">ADD ENTRY</button>
-      </section>
+        <div class="form-group">
+          <label class="field-label" for="historyNote">Notes</label>
+          <textarea id="historyNote" rows="2" placeholder="What did you do?"></textarea>
+        </div>
+        <button class="btn-secondary" onclick="addHistoryEntry()">Add Entry</button>
+      </div>
 
-      <section class="panel">
+    </section>
+
+    <!-- ===== LOG VIEW ===== -->
+    <section class="view" id="view-log">
+      <div class="section-head">
+        <h2>Work Log</h2>
+        <div class="head-actions">
+          <button class="btn-ghost" onclick="exportCsv()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+          <button class="btn-ghost" onclick="window.print()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print
+          </button>
+          <button class="btn-danger-ghost" onclick="clearAll()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            Clear All
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <select id="filterTag" onchange="renderLog()">
+          <option value="">All types</option>
+          <option value="General">General</option>
+          <option value="Feeding">Feeding</option>
+          <option value="Fencing">Fencing</option>
+          <option value="Planting">Planting</option>
+          <option value="Harvest">Harvest</option>
+          <option value="Equipment">Equipment</option>
+          <option value="Other">Other</option>
+        </select>
+        <select id="filterRange" onchange="renderLog()">
+          <option value="all">All time</option>
+          <option value="week">This week</option>
+          <option value="month">This month</option>
+        </select>
+        <input type="text" id="filterSearch" placeholder="Search notes…" oninput="renderLog()" />
+      </div>
+
+      <div class="log-table-wrap">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Type</th>
+              <th>Hours</th>
+              <th>Earned</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="entriesBody"></tbody>
+        </table>
+        <div id="logEmpty" class="log-empty" style="display:none">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <p>No entries yet. Start a session or add a past entry.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SUMMARY VIEW ===== -->
+    <section class="view" id="view-summary">
+      <div class="section-head">
         <h2>Summary</h2>
-        <div class="summary-cards">
-          <article class="summary-card">
-            <p class="summary-label">Total Hours</p>
-            <p class="summary-value" id="totalHours">0.00</p>
-          </article>
-          <article class="summary-card">
-            <p class="summary-label">Money Earned</p>
-            <p class="summary-value" id="totalMoney">$0.00</p>
-          </article>
-          <article class="summary-card">
-            <p class="summary-label">Avg Hours / Day</p>
-            <p class="summary-value" id="avgHours">0.00</p>
-          </article>
-          <article class="summary-card">
-            <p class="summary-label">Total Sessions</p>
-            <p class="summary-value" id="sessionCount">0</p>
-          </article>
-        </div>
-      </section>
+      </div>
 
-      <section class="panel">
-        <div class="panel-header">
-          <h2>Work Log</h2>
-          <div class="button-group-horizontal">
-            <button id="exportCsvBtn" class="btn btn-secondary btn-small">EXPORT CSV</button>
-            <button id="printBtn" class="btn btn-secondary btn-small">PRINT</button>
-            <button id="clearBtn" class="btn btn-danger btn-small">CLEAR</button>
+      <div class="stats-grid">
+        <div class="stat-card accent">
+          <p class="stat-label">Total Hours</p>
+          <p class="stat-value" id="totalHours">0.0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Total Earned</p>
+          <p class="stat-value" id="totalMoney">$0.00</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Sessions</p>
+          <p class="stat-value" id="sessionCount">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Avg / Day</p>
+          <p class="stat-value" id="avgHours">0.0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Best Day</p>
+          <p class="stat-value" id="bestDay">—</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">This Week</p>
+          <p class="stat-value" id="weekHours">0.0</p>
+        </div>
+      </div>
+
+      <div class="section-head" style="margin-top:2rem">
+        <h2>Hours by type</h2>
+      </div>
+      <div class="breakdown-list" id="breakdownList"></div>
+
+      <div class="section-head" style="margin-top:2rem">
+        <h2>Last 7 days</h2>
+      </div>
+      <div class="week-chart" id="weekChart"></div>
+    </section>
+
+    <!-- ===== SETTINGS VIEW ===== -->
+    <section class="view" id="view-settings">
+      <div class="section-head">
+        <h2>Settings</h2>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-row">
+          <div>
+            <p class="settings-label">Hourly Rate</p>
+            <p class="settings-sub">Used to calculate earnings</p>
+          </div>
+          <div class="rate-input-wrap">
+            <span class="rate-prefix">$</span>
+            <input type="number" id="rateInput" min="0" step="0.50" placeholder="0.00" oninput="saveRate()" />
+            <span class="rate-suffix">/hr</span>
           </div>
         </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Hours</th>
-                <th>Notes</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="entriesBody"></tbody>
-          </table>
+        <div class="settings-row">
+          <div>
+            <p class="settings-label">Daily Goal</p>
+            <p class="settings-sub">Hours per day to track progress</p>
+          </div>
+          <div class="rate-input-wrap">
+            <input type="number" id="goalInput" min="0" max="24" step="0.5" placeholder="8" oninput="saveGoal()" />
+            <span class="rate-suffix">hrs</span>
+          </div>
         </div>
-      </section>
+        <div class="settings-row">
+          <div>
+            <p class="settings-label">Worker Name</p>
+            <p class="settings-sub">Shown on exports and print</p>
+          </div>
+          <input type="text" id="workerName" placeholder="Your name" oninput="saveName()" style="max-width:180px" />
+        </div>
+      </div>
 
-      <div id="status" role="status" aria-live="polite" class="status-message"></div>
-    </main>
+      <div class="section-head" style="margin-top:2rem">
+        <h2>Data</h2>
+      </div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div>
+            <p class="settings-label">Export all data</p>
+            <p class="settings-sub">Download a full CSV backup</p>
+          </div>
+          <button class="btn-secondary" onclick="exportCsv()">Export CSV</button>
+        </div>
+        <div class="settings-row danger-row">
+          <div>
+            <p class="settings-label">Delete all entries</p>
+            <p class="settings-sub">This cannot be undone</p>
+          </div>
+          <button class="btn-danger-outline" onclick="clearAll()">Clear Data</button>
+        </div>
+      </div>
+    </section>
 
-    <script src="app.js"></script>
-  </body>
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========== STATE ========== */
+let entries = JSON.parse(localStorage.getItem('fw_entries') || '[]');
+let settings = JSON.parse(localStorage.getItem('fw_settings') || '{"rate":0,"goal":8,"name":""}');
+let activeSession = null;
+let timerInterval = null;
+let selectedTag = 'General';
+
+/* ========== INIT ========== */
+document.addEventListener('DOMContentLoaded', () => {
+  loadSettings();
+  updateAllStats();
+  renderLog();
+  setTimerDate();
+  updateStreak();
+  setInterval(setTimerDate, 60000);
+});
+
+function setTimerDate() {
+  const d = new Date();
+  document.getElementById('timerDate').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+}
+
+/* ========== VIEWS ========== */
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelector(`.nav-item[data-view="${name}"]`).classList.add('active');
+  if (name === 'summary') { renderSummary(); }
+  if (name === 'log') { renderLog(); }
+}
+
+/* ========== TAGS ========== */
+document.querySelectorAll('.tag-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedTag = btn.dataset.tag;
+  });
+});
+
+/* ========== TIMER ========== */
+function startSession() {
+  const note = document.getElementById('activeNote').value.trim();
+  activeSession = { start: Date.now(), note, tag: selectedTag };
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('stopBtn').disabled = false;
+  document.getElementById('sessionMeta').style.display = 'flex';
+  document.getElementById('sessionStart').textContent = 'Started ' + fmtTime(new Date());
+  document.getElementById('fieldStrip').classList.add('active');
+  timerInterval = setInterval(tickTimer, 1000);
+  tickTimer();
+}
+
+function stopSession() {
+  if (!activeSession) return;
+  clearInterval(timerInterval);
+  const end = Date.now();
+  const hours = (end - activeSession.start) / 3600000;
+  const entry = {
+    id: crypto.randomUUID(),
+    start: new Date(activeSession.start).toISOString(),
+    end: new Date(end).toISOString(),
+    hours: +hours.toFixed(4),
+    note: activeSession.note,
+    tag: activeSession.tag
+  };
+  entries.unshift(entry);
+  saveEntries();
+  resetTimer();
+  updateAllStats();
+  toast(`Session saved — ${hours.toFixed(2)} hrs`, 'success');
+}
+
+function tickTimer() {
+  const elapsed = Date.now() - activeSession.start;
+  document.getElementById('timerDisplay').textContent = fmtElapsed(elapsed);
+  document.getElementById('timerStatus').textContent = 'Session in progress';
+  const earned = (elapsed / 3600000) * (settings.rate || 0);
+  document.getElementById('sessionEarning').textContent = '$' + earned.toFixed(2) + ' earned';
+}
+
+function resetTimer() {
+  activeSession = null;
+  clearInterval(timerInterval);
+  document.getElementById('timerDisplay').textContent = '00:00:00';
+  document.getElementById('timerStatus').textContent = 'Ready to start';
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+  document.getElementById('sessionMeta').style.display = 'none';
+  document.getElementById('activeNote').value = '';
+  document.getElementById('fieldStrip').classList.remove('active');
+}
+
+/* ========== HISTORY ENTRY ========== */
+function addHistoryEntry() {
+  const start = document.getElementById('historyStart').value;
+  const end = document.getElementById('historyEnd').value;
+  const note = document.getElementById('historyNote').value.trim();
+  const tag = document.getElementById('historyTag').value;
+
+  if (!start || !end) { toast('Please fill in start and end times', 'error'); return; }
+  const s = new Date(start), e = new Date(end);
+  if (e <= s) { toast('End must be after start', 'error'); return; }
+
+  const hours = (e - s) / 3600000;
+  const entry = { id: crypto.randomUUID(), start: s.toISOString(), end: e.toISOString(), hours: +hours.toFixed(4), note, tag };
+  entries.unshift(entry);
+  saveEntries();
+  updateAllStats();
+  renderLog();
+  document.getElementById('historyStart').value = '';
+  document.getElementById('historyEnd').value = '';
+  document.getElementById('historyNote').value = '';
+  toast(`Entry added — ${hours.toFixed(2)} hrs`, 'success');
+}
+
+/* ========== RENDER LOG ========== */
+function renderLog() {
+  const tbody = document.getElementById('entriesBody');
+  const tagFilter = document.getElementById('filterTag')?.value || '';
+  const rangeFilter = document.getElementById('filterRange')?.value || 'all';
+  const search = (document.getElementById('filterSearch')?.value || '').toLowerCase();
+
+  const now = new Date();
+  const filtered = entries.filter(e => {
+    if (tagFilter && e.tag !== tagFilter) return false;
+    if (search && !(e.note || '').toLowerCase().includes(search) && !e.tag.toLowerCase().includes(search)) return false;
+    if (rangeFilter === 'week') {
+      const d = new Date(e.start);
+      const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0,0,0,0);
+      if (d < startOfWeek) return false;
+    }
+    if (rangeFilter === 'month') {
+      const d = new Date(e.start);
+      if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return false;
+    }
+    return true;
+  });
+
+  const empty = document.getElementById('logEmpty');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(e => {
+    const earned = (e.hours * (settings.rate || 0)).toFixed(2);
+    return `<tr>
+      <td>${fmtDate(new Date(e.start))}</td>
+      <td>${fmtTime(new Date(e.start))}</td>
+      <td>${fmtTime(new Date(e.end))}</td>
+      <td><span class="tag-pill">${e.tag || 'General'}</span></td>
+      <td class="mono">${e.hours.toFixed(2)}</td>
+      <td class="mono earned-col">$${earned}</td>
+      <td class="note-col">${e.note || '—'}</td>
+      <td><button class="btn-delete" onclick="deleteEntry('${e.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteEntry(id) {
+  entries = entries.filter(e => e.id !== id);
+  saveEntries();
+  updateAllStats();
+  renderLog();
+  toast('Entry removed', 'info');
+}
+
+/* ========== STATS ========== */
+function updateAllStats() {
+  const totalHours = entries.reduce((a, e) => a + e.hours, 0);
+  const totalMoney = totalHours * (settings.rate || 0);
+  const days = new Set(entries.map(e => fmtDate(new Date(e.start)))).size || 1;
+  const avg = totalHours / days;
+
+  document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+  document.getElementById('totalMoney').textContent = '$' + totalMoney.toFixed(2);
+  document.getElementById('sessionCount').textContent = entries.length;
+  document.getElementById('avgHours').textContent = avg.toFixed(1);
+
+  // Today
+  const today = fmtDate(new Date());
+  const todayHours = entries.filter(e => fmtDate(new Date(e.start)) === today).reduce((a, e) => a + e.hours, 0);
+  document.getElementById('todayHours').textContent = todayHours.toFixed(1) + ' hrs';
+  const goal = settings.goal || 8;
+  const pct = Math.min(100, (todayHours / goal) * 100);
+  document.getElementById('dayGoalFill').style.width = pct + '%';
+  document.getElementById('goalLabel').textContent = Math.round(pct) + '% of daily goal';
+
+  updateStreak();
+}
+
+function updateStreak() {
+  const dateset = new Set(entries.map(e => fmtDate(new Date(e.start))));
+  let streak = 0;
+  const now = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(now); d.setDate(now.getDate() - i);
+    if (dateset.has(fmtDate(d))) { streak++; } else break;
+  }
+  document.getElementById('streakNum').textContent = streak;
+}
+
+function renderSummary() {
+  const totalHours = entries.reduce((a, e) => a + e.hours, 0);
+  const totalMoney = totalHours * (settings.rate || 0);
+  const dayMap = {};
+  entries.forEach(e => {
+    const d = fmtDate(new Date(e.start));
+    dayMap[d] = (dayMap[d] || 0) + e.hours;
+  });
+  const days = Object.keys(dayMap);
+  const avg = days.length ? totalHours / days.length : 0;
+  let bestDay = '—', bestHrs = 0;
+  days.forEach(d => { if (dayMap[d] > bestHrs) { bestHrs = dayMap[d]; bestDay = d; } });
+
+  const now = new Date();
+  const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay()); startOfWeek.setHours(0,0,0,0);
+  const weekHours = entries.filter(e => new Date(e.start) >= startOfWeek).reduce((a, e) => a + e.hours, 0);
+
+  document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+  document.getElementById('totalMoney').textContent = '$' + totalMoney.toFixed(2);
+  document.getElementById('sessionCount').textContent = entries.length;
+  document.getElementById('avgHours').textContent = avg.toFixed(1);
+  document.getElementById('bestDay').textContent = bestDay !== '—' ? bestDay : '—';
+  document.getElementById('weekHours').textContent = weekHours.toFixed(1);
+
+  // Breakdown by tag
+  const tagMap = {};
+  entries.forEach(e => { tagMap[e.tag || 'General'] = (tagMap[e.tag || 'General'] || 0) + e.hours; });
+  const breakdownEl = document.getElementById('breakdownList');
+  breakdownEl.innerHTML = Object.entries(tagMap).sort((a,b) => b[1]-a[1]).map(([tag, hrs]) => {
+    const pct = totalHours > 0 ? (hrs / totalHours * 100) : 0;
+    return `<div class="breakdown-row">
+      <span class="breakdown-tag">${tag}</span>
+      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${pct}%"></div></div>
+      <span class="breakdown-hrs">${hrs.toFixed(1)} hrs</span>
+    </div>`;
+  }).join('') || '<p class="muted-text">No data yet</p>';
+
+  // 7-day chart
+  const chartEl = document.getElementById('weekChart');
+  const labels = [];
+  const vals = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now); d.setDate(now.getDate() - i);
+    const key = fmtDate(d);
+    labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+    vals.push(dayMap[key] || 0);
+  }
+  const max = Math.max(...vals, 1);
+  chartEl.innerHTML = vals.map((v, i) => {
+    const h = Math.max(4, (v / max) * 120);
+    const isToday = i === 6;
+    return `<div class="bar-col">
+      <span class="bar-val">${v > 0 ? v.toFixed(1) : ''}</span>
+      <div class="bar-rect ${isToday ? 'today' : ''}" style="height:${h}px"></div>
+      <span class="bar-label">${labels[i]}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ========== SETTINGS ========== */
+function loadSettings() {
+  document.getElementById('rateInput').value = settings.rate || '';
+  document.getElementById('goalInput').value = settings.goal || 8;
+  document.getElementById('workerName').value = settings.name || '';
+}
+
+function saveRate() {
+  settings.rate = parseFloat(document.getElementById('rateInput').value) || 0;
+  localStorage.setItem('fw_settings', JSON.stringify(settings));
+  updateAllStats();
+}
+
+function saveGoal() {
+  settings.goal = parseFloat(document.getElementById('goalInput').value) || 8;
+  localStorage.setItem('fw_settings', JSON.stringify(settings));
+  updateAllStats();
+}
+
+function saveName() {
+  settings.name = document.getElementById('workerName').value;
+  localStorage.setItem('fw_settings', JSON.stringify(settings));
+}
+
+/* ========== EXPORT ========== */
+function exportCsv() {
+  if (!entries.length) { toast('No entries to export', 'error'); return; }
+  const header = ['Date','Start','End','Tag','Hours','Earned','Notes'];
+  const rows = entries.map(e => [
+    fmtDate(new Date(e.start)),
+    fmtTime(new Date(e.start)),
+    fmtTime(new Date(e.end)),
+    e.tag || 'General',
+    e.hours.toFixed(2),
+    '$' + (e.hours * (settings.rate || 0)).toFixed(2),
+    '"' + (e.note || '').replace(/"/g, '""') + '"'
+  ]);
+  const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'farm-work-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  toast('CSV exported', 'success');
+}
+
+function clearAll() {
+  if (!confirm('Delete all entries? This cannot be undone.')) return;
+  entries = [];
+  saveEntries();
+  updateAllStats();
+  renderLog();
+  toast('All entries cleared', 'info');
+}
+
+/* ========== UTILS ========== */
+function saveEntries() { localStorage.setItem('fw_entries', JSON.stringify(entries)); }
+
+function fmtDate(d) {
+  return d.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'2-digit' });
+}
+
+function fmtTime(d) {
+  return d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+}
+
+function fmtElapsed(ms) {
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600).toString().padStart(2,'0');
+  const m = Math.floor((s % 3600) / 60).toString().padStart(2,'0');
+  const sec = (s % 60).toString().padStart(2,'0');
+  return `${h}:${m}:${sec}`;
+}
+
+function toast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
 </html>
